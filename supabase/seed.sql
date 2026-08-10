@@ -1,0 +1,238 @@
+-- ============================================================
+-- Mad Mojo — starting catalog
+-- Run AFTER schema.sql. Safe to re-run (upserts by slug).
+--
+-- Image paths point at /products/... files bundled with the app
+-- (created by `npm run prepare-images`). Images uploaded through
+-- the admin panel go to Supabase Storage and use full URLs.
+-- ============================================================
+
+insert into public.categories (slug, name_en, name_es, sort) values
+  ('paintings', 'Paintings & Prints', 'Pinturas y láminas', 1),
+  ('clothing', 'Wearable Art', 'Arte para vestir', 2)
+on conflict (slug) do update
+  set name_en = excluded.name_en, name_es = excluded.name_es, sort = excluded.sort;
+
+with cat as (
+  select slug, id from public.categories
+)
+insert into public.products
+  (slug, category_id, name_en, name_es, description_en, description_es,
+   details_en, details_es, price_cents, compare_at_cents, badge, images, sizes, stock, is_active)
+values
+  ('the-cockatoo', (select id from cat where slug = 'paintings'),
+   'The Cockatoo — Original Painting', 'La Cacatúa — Pintura original',
+   'A storm-blue cockatoo buried in a jungle of leaves and blossoms. This is the original, one-of-one acrylic painting on canvas — the loudest quiet companion your living room will ever have.',
+   'Una cacatúa azul tormenta escondida en una selva de hojas y flores. Esta es la pintura original, única, en acrílico sobre lienzo — la compañía silenciosa más ruidosa que tendrá tu salón.',
+   'Original acrylic on canvas · 120 × 150 cm · signed by Magda · ships rolled in a protective tube',
+   'Acrílico original sobre lienzo · 120 × 150 cm · firmado por Magda · se envía enrollado en tubo protector',
+   145000, null, 'new', '["/products/the-cockatoo/1.jpg"]'::jsonb, null, 1, true),
+
+  ('parrots-in-love', (select id from cat where slug = 'paintings'),
+   'Parrots in Love — Original Painting', 'Loros enamorados — Pintura original',
+   'Two fire-orange parrots leaning into each other on a tangle of tropical color. Original acrylic on canvas, painted over three mad weeks.',
+   'Dos loros naranja fuego apoyados el uno en el otro sobre una maraña de color tropical. Acrílico original sobre lienzo, pintado durante tres semanas de locura.',
+   'Original acrylic on canvas · 140 × 160 cm · signed by Magda · ships rolled in a protective tube',
+   'Acrílico original sobre lienzo · 140 × 160 cm · firmado por Magda · se envía enrollado en tubo protector',
+   160000, null, 'bestseller',
+   '["/products/parrots-in-love/1.jpg","/products/parrots-in-love/2.jpg","/products/parrots-in-love/3.jpg"]'::jsonb,
+   null, 1, true),
+
+  ('the-monkey-king', (select id from cat where slug = 'paintings'),
+   'The Monkey King — Art Print', 'El Rey Mono — Lámina',
+   'A screaming psychedelic monkey crowned in candy colors. Museum-grade giclée print of Magda''s original painting.',
+   'Un mono psicodélico gritando, coronado en colores caramelo. Lámina giclée de calidad de museo de la pintura original de Magda.',
+   'Giclée print · A3 (29.7 × 42 cm) · 250 gsm archival matte paper · frame not included',
+   'Lámina giclée · A3 (29,7 × 42 cm) · papel mate de archivo 250 g/m² · marco no incluido',
+   9500, null, null,
+   '["/products/the-monkey-king/1.jpg","/products/the-monkey-king/2.jpg"]'::jsonb, null, 25, true),
+
+  ('st-pigeon', (select id from cat where slug = 'paintings'),
+   'St. Pigeon — Art Print', 'San Palomo — Lámina',
+   'The patron saint of park benches, haloed in flames and roses. A tongue-in-cheek icon for people who take joy seriously.',
+   'El santo patrón de los bancos del parque, con un halo de llamas y rosas. Un icono con guiño para gente que se toma la alegría en serio.',
+   'Giclée print · A3 (29.7 × 42 cm) · 250 gsm archival matte paper · frame not included',
+   'Lámina giclée · A3 (29,7 × 42 cm) · papel mate de archivo 250 g/m² · marco no incluido',
+   9500, null, 'bestseller',
+   '["/products/st-pigeon/1.jpg","/products/st-pigeon/2.jpg"]'::jsonb, null, 25, true),
+
+  ('golden-cobra', (select id from cat where slug = 'paintings'),
+   'Golden Cobra — Art Print', 'Cobra dorada — Lámina',
+   'A cobra in gold and venom-green, coiled like a warning and a welcome at the same time.',
+   'Una cobra en dorado y verde veneno, enroscada como advertencia y bienvenida a la vez.',
+   'Giclée print · 50 × 70 cm · 250 gsm archival matte paper · frame not included',
+   'Lámina giclée · 50 × 70 cm · papel mate de archivo 250 g/m² · marco no incluido',
+   9500, null, null, '["/products/golden-cobra/1.jpg"]'::jsonb, null, 25, true),
+
+  ('the-tempest', (select id from cat where slug = 'paintings'),
+   'The Tempest (Puma) — Art Print', 'La Tempestad (Puma) — Lámina',
+   'A puma mid-storm, all muscle and static electricity. From the Humdrum series — for rooms that need a pulse.',
+   'Un puma en plena tormenta, todo músculo y electricidad estática. De la serie Humdrum — para habitaciones que necesitan pulso.',
+   'Giclée print · 50 × 70 cm · 250 gsm archival matte paper · frame not included',
+   'Lámina giclée · 50 × 70 cm · papel mate de archivo 250 g/m² · marco no incluido',
+   11000, null, null, '["/products/the-tempest/1.jpg"]'::jsonb, null, 25, true),
+
+  ('neba-tiger', (select id from cat where slug = 'paintings'),
+   'Neba Tiger — Art Print', 'Tigre Neba — Lámina',
+   'A tiger that swallowed a sunset. Layered stripes, impossible colors, zero apologies.',
+   'Un tigre que se tragó un atardecer. Rayas en capas, colores imposibles, cero disculpas.',
+   'Giclée print · 50 × 70 cm · 250 gsm archival matte paper · frame not included',
+   'Lámina giclée · 50 × 70 cm · papel mate de archivo 250 g/m² · marco no incluido',
+   11000, null, null,
+   '["/products/neba-tiger/1.jpg","/products/neba-tiger/2.jpg","/products/neba-tiger/3.jpg"]'::jsonb,
+   null, 25, true),
+
+  ('the-heron', (select id from cat where slug = 'paintings'),
+   'The Heron — Art Print', 'La Garza — Lámina',
+   'A heron standing perfectly still while the jungle riots around it. For people who stay calm in loud rooms.',
+   'Una garza perfectamente quieta mientras la selva se alborota a su alrededor. Para gente que mantiene la calma en habitaciones ruidosas.',
+   'Giclée print · 50 × 70 cm · 250 gsm archival matte paper · frame not included',
+   'Lámina giclée · 50 × 70 cm · papel mate de archivo 250 g/m² · marco no incluido',
+   9500, null, 'restocked',
+   '["/products/the-heron/1.jpg","/products/the-heron/2.jpg"]'::jsonb, null, 25, true),
+
+  ('cat-eye', (select id from cat where slug = 'paintings'),
+   'Cat Eye — Art Print', 'Ojo de gato — Lámina',
+   'One enormous, knowing cat eye. It has seen your browser history and loves you anyway.',
+   'Un enorme ojo de gato que lo sabe todo. Ha visto tu historial y aun así te quiere.',
+   'Giclée print · A3 (29.7 × 42 cm) · 250 gsm archival matte paper · frame not included',
+   'Lámina giclée · A3 (29,7 × 42 cm) · papel mate de archivo 250 g/m² · marco no incluido',
+   8500, null, null, '["/products/cat-eye/1.jpg"]'::jsonb, null, 25, true),
+
+  ('mirrors', (select id from cat where slug = 'paintings'),
+   'Mirrors — Art Print', 'Espejos — Lámina',
+   'Reflections folding into reflections — a dreamscape from the Humdrum series that rewards long stares.',
+   'Reflejos que se pliegan en reflejos — un paisaje onírico de la serie Humdrum que premia las miradas largas.',
+   'Giclée print · 50 × 70 cm · 250 gsm archival matte paper · frame not included',
+   'Lámina giclée · 50 × 70 cm · papel mate de archivo 250 g/m² · marco no incluido',
+   9500, null, null, '["/products/mirrors/1.jpg"]'::jsonb, null, 25, true),
+
+  ('the-bridge', (select id from cat where slug = 'paintings'),
+   'The Bridge — Art Print', 'El Puente — Lámina',
+   'A bridge between two worlds that don''t quite agree on physics. Cross at your own delight.',
+   'Un puente entre dos mundos que no se ponen de acuerdo en la física. Crúzalo bajo tu propio deleite.',
+   'Giclée print · 50 × 70 cm · 250 gsm archival matte paper · frame not included',
+   'Lámina giclée · 50 × 70 cm · papel mate de archivo 250 g/m² · marco no incluido',
+   9500, null, null, '["/products/the-bridge/1.jpg"]'::jsonb, null, 25, true),
+
+  ('weird-boy', (select id from cat where slug = 'paintings'),
+   'Weird Boy (Humdrum V) — Art Print', 'Chico raro (Humdrum V) — Lámina',
+   'The fifth chapter of the Humdrum series: a portrait of every kid who drew on the walls and turned out great.',
+   'El quinto capítulo de la serie Humdrum: un retrato de todos los niños que dibujaban en las paredes y acabaron geniales.',
+   'Giclée print · 50 × 70 cm · 250 gsm archival matte paper · frame not included',
+   'Lámina giclée · 50 × 70 cm · papel mate de archivo 250 g/m² · marco no incluido',
+   9500, null, null,
+   '["/products/weird-boy/1.jpg","/products/weird-boy/2.jpg"]'::jsonb, null, 25, true),
+
+  ('yolo-cat', (select id from cat where slug = 'paintings'),
+   'YOLO Cat — Mini Print', 'Gato YOLO — Mini lámina',
+   'A spotted yellow cat diving through a hula hoop, because you only live once — nine times.',
+   'Un gato amarillo con manchas saltando por un aro, porque solo se vive una vez — nueve veces.',
+   'Giclée print · A4 (21 × 29.7 cm) · 250 gsm archival matte paper · frame not included',
+   'Lámina giclée · A4 (21 × 29,7 cm) · papel mate de archivo 250 g/m² · marco no incluido',
+   7500, 9000, 'new',
+   '["/products/yolo-cat/1.jpg","/products/yolo-cat/2.jpg"]'::jsonb, null, 30, true),
+
+  ('superius', (select id from cat where slug = 'paintings'),
+   'Superius (Humdrum III) — Art Print', 'Superius (Humdrum III) — Lámina',
+   'Part three of the Humdrum series — a triumphant, over-caffeinated fever dream in full color.',
+   'Tercera parte de la serie Humdrum — un sueño febril triunfante y con demasiada cafeína, a todo color.',
+   'Giclée print · 50 × 70 cm · 250 gsm archival matte paper · frame not included',
+   'Lámina giclée · 50 × 70 cm · papel mate de archivo 250 g/m² · marco no incluido',
+   9500, null, null, '["/products/superius/1.jpg"]'::jsonb, null, 25, true),
+
+  ('medicine', (select id from cat where slug = 'paintings'),
+   'Medicine (Humdrum IV) — Art Print', 'Medicina (Humdrum IV) — Lámina',
+   'The fourth Humdrum: strange remedies, bright bottles, and the suspicion that color heals faster than pills.',
+   'El cuarto Humdrum: remedios extraños, frascos brillantes y la sospecha de que el color cura más rápido que las pastillas.',
+   'Giclée print · 50 × 70 cm · 250 gsm archival matte paper · frame not included',
+   'Lámina giclée · 50 × 70 cm · papel mate de archivo 250 g/m² · marco no incluido',
+   9500, null, null, '["/products/medicine/1.jpg"]'::jsonb, null, 25, true),
+
+  ('the-rooster', (select id from cat where slug = 'paintings'),
+   'The Rooster (Humdrum XVI) — Art Print', 'El Gallo (Humdrum XVI) — Lámina',
+   'A rooster with main-character energy. Crows at dawn, at noon, and whenever it feels underappreciated.',
+   'Un gallo con energía de protagonista. Canta al amanecer, al mediodía y cuando se siente poco valorado.',
+   'Giclée print · 50 × 70 cm · 250 gsm archival matte paper · frame not included',
+   'Lámina giclée · 50 × 70 cm · papel mate de archivo 250 g/m² · marco no incluido',
+   9500, null, null, '["/products/the-rooster/1.jpg"]'::jsonb, null, 25, true),
+
+  ('mustard-cat', (select id from cat where slug = 'paintings'),
+   'Mustard Cat (Humdrum XVII) — Art Print', 'Gato Mostaza (Humdrum XVII) — Lámina',
+   'A mustard-yellow cat with the confidence of a much larger animal. Seventeenth in the Humdrum series.',
+   'Un gato amarillo mostaza con la confianza de un animal mucho más grande. Decimoséptimo de la serie Humdrum.',
+   'Giclée print · 50 × 70 cm · 250 gsm archival matte paper · frame not included',
+   'Lámina giclée · 50 × 70 cm · papel mate de archivo 250 g/m² · marco no incluido',
+   9500, null, 'new', '["/products/mustard-cat/1.jpg"]'::jsonb, null, 25, true),
+
+  ('humdrum-vii', (select id from cat where slug = 'paintings'),
+   'Humdrum VII — Art Print', 'Humdrum VII — Lámina',
+   'The seventh Humdrum — a kaleidoscope of creatures that only makes more sense the longer you look.',
+   'El séptimo Humdrum — un caleidoscopio de criaturas que tiene más sentido cuanto más lo miras.',
+   'Giclée print · 50 × 70 cm · 250 gsm archival matte paper · frame not included',
+   'Lámina giclée · 50 × 70 cm · papel mate de archivo 250 g/m² · marco no incluido',
+   9500, null, null, '["/products/humdrum-vii/1.jpg"]'::jsonb, null, 25, true),
+
+  ('jacket-tiger', (select id from cat where slug = 'paintings'),
+   'Jacket Tiger — Art Print', 'Tigre con chaqueta — Lámina',
+   'A tiger in a very good jacket. Better dressed than most of us, and it knows it.',
+   'Un tigre con una chaqueta muy buena. Mejor vestido que la mayoría de nosotros, y lo sabe.',
+   'Giclée print · 50 × 70 cm · 250 gsm archival matte paper · frame not included',
+   'Lámina giclée · 50 × 70 cm · papel mate de archivo 250 g/m² · marco no incluido',
+   12000, 15000, null, '["/products/jacket-tiger/1.jpg"]'::jsonb, null, 25, true),
+
+  ('kimono-blue-ginkgo', (select id from cat where slug = 'clothing'),
+   'Blue Ginkgo Kimono', 'Kimono Ginkgo Azul',
+   'Cobalt blue meets poppy red in a ginkgo-leaf pattern painted by Magda and printed on flowing fabric. Throw it over anything and the room changes temperature.',
+   'El azul cobalto se encuentra con el rojo amapola en un patrón de hojas de ginkgo pintado por Magda e impreso en tela fluida. Póntelo sobre cualquier cosa y la habitación cambia de temperatura.',
+   '100% viscose · relaxed one-size fit (fits US 4–14) · pattern from an original painting · gentle wash, cold',
+   '100% viscosa · talla única holgada (equivale a US 4–14) · patrón de una pintura original · lavado suave, en frío',
+   14500, null, 'bestseller',
+   '["/products/kimono-blue-ginkgo/1.jpg","/products/kimono-blue-ginkgo/2.jpg","/products/kimono-blue-ginkgo/3.jpg","/products/kimono-blue-ginkgo/4.jpg","/products/kimono-blue-ginkgo/5.jpg"]'::jsonb,
+   '["One Size"]'::jsonb, 8, true),
+
+  ('kimono-crane', (select id from cat where slug = 'clothing'),
+   'The Crane Kimono', 'Kimono La Grulla',
+   'Sunshine yellow with teal jungle panels and crane motifs lifted straight from Magda''s canvas. The piece people will ask you about at parties.',
+   'Amarillo sol con paneles de selva turquesa y motivos de grullas sacados directamente del lienzo de Magda. La prenda por la que te preguntarán en las fiestas.',
+   '100% viscose · relaxed one-size fit (fits US 4–14) · pattern from an original painting · gentle wash, cold',
+   '100% viscosa · talla única holgada (equivale a US 4–14) · patrón de una pintura original · lavado suave, en frío',
+   14500, null, 'new',
+   '["/products/kimono-crane/1.jpg","/products/kimono-crane/2.jpg","/products/kimono-crane/3.jpg","/products/kimono-crane/4.jpg","/products/kimono-crane/5.jpg"]'::jsonb,
+   '["One Size"]'::jsonb, 8, true),
+
+  ('kimono-parrot', (select id from cat where slug = 'clothing'),
+   'The Parrot Kimono', 'Kimono El Loro',
+   'A riot of parrots, blossoms and zebra stripes on soft flowing fabric. Wearable proof that more is more.',
+   'Un alboroto de loros, flores y rayas de cebra sobre tela suave y fluida. Prueba ponible de que más es más.',
+   '100% viscose · relaxed one-size fit (fits US 4–14) · pattern from an original painting · gentle wash, cold',
+   '100% viscosa · talla única holgada (equivale a US 4–14) · patrón de una pintura original · lavado suave, en frío',
+   14500, null, null,
+   '["/products/kimono-parrot/1.jpg","/products/kimono-parrot/2.jpg","/products/kimono-parrot/3.jpg","/products/kimono-parrot/4.jpg","/products/kimono-parrot/5.jpg"]'::jsonb,
+   '["One Size"]'::jsonb, 8, true),
+
+  ('jungle-heart-tee', (select id from cat where slug = 'clothing'),
+   'Jungle Heart Tee', 'Camiseta Corazón de Selva',
+   'An oversized tee covered in Magda''s jungle-heart pattern — orange, violet and green having the time of their lives. Unisex, heavyweight, zero chill.',
+   'Una camiseta oversize cubierta con el patrón corazón de selva de Magda — naranja, violeta y verde pasándolo en grande. Unisex, gruesa, cero discreción.',
+   '100% combed cotton, 220 gsm · unisex oversized fit · pattern from an original painting · machine wash cold, inside out',
+   '100% algodón peinado, 220 g/m² · corte unisex oversize · patrón de una pintura original · lavar en frío, del revés',
+   5800, null, null,
+   '["/products/jungle-heart-tee/1.jpg","/products/jungle-heart-tee/2.jpg","/products/jungle-heart-tee/3.jpg","/products/jungle-heart-tee/4.jpg","/products/jungle-heart-tee/5.jpg"]'::jsonb,
+   '["XS","S","M","L","XL"]'::jsonb, 40, true)
+
+on conflict (slug) do update set
+  category_id = excluded.category_id,
+  name_en = excluded.name_en,
+  name_es = excluded.name_es,
+  description_en = excluded.description_en,
+  description_es = excluded.description_es,
+  details_en = excluded.details_en,
+  details_es = excluded.details_es,
+  price_cents = excluded.price_cents,
+  compare_at_cents = excluded.compare_at_cents,
+  badge = excluded.badge,
+  images = excluded.images,
+  sizes = excluded.sizes,
+  stock = excluded.stock,
+  is_active = excluded.is_active;
