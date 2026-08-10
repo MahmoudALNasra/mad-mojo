@@ -77,7 +77,7 @@ async def synth_line(text: str, out: Path) -> None:
     communicate = edge_tts.Communicate(text, VOICE, rate=RATE)
     mp3 = out.with_suffix(".mp3")
     await communicate.save(str(mp3))
-    # Convert + strip leading/trailing silence (main cause of "late" VO)
+    # Convert only — do not strip "silence" (edge-tts pauses get eaten otherwise)
     run(
         [
             "ffmpeg",
@@ -88,9 +88,6 @@ async def synth_line(text: str, out: Path) -> None:
             "1",
             "-ar",
             "44100",
-            "-af",
-            "silenceremove=start_periods=1:start_silence=0.02:start_threshold=-38dB:"
-            "stop_periods=1:stop_silence=0.08:stop_threshold=-38dB",
             str(out),
         ]
     )
