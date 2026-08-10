@@ -6,14 +6,12 @@ import { useLocale } from "@/lib/i18n/LocaleProvider";
 
 type StudioFilmProps = {
   src?: string;
-  captionsSrc?: string;
   poster?: string;
   productHref?: string;
 };
 
 export function StudioFilm({
   src = "/videos/studio-painting.mp4",
-  captionsSrc = "/videos/studio-painting.vtt",
   poster = "/videos/studio-poster.jpg",
   productHref = "/shop/paintings",
 }: StudioFilmProps) {
@@ -26,11 +24,6 @@ export function StudioFilm({
     const el = videoRef.current;
     if (!el) return;
     el.muted = muted;
-    // Prefer showing captions when available
-    const tracks = el.textTracks;
-    for (let i = 0; i < tracks.length; i += 1) {
-      tracks[i].mode = "showing";
-    }
   }, [muted]);
 
   function togglePlay() {
@@ -74,16 +67,9 @@ export function StudioFilm({
               onEnded={() => setPlaying(false)}
             >
               <source src={src} type="video/mp4" />
-              <track
-                kind="captions"
-                srcLang="en"
-                label="English"
-                src={captionsSrc}
-                default
-              />
             </video>
-            <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-ink/55 via-transparent to-ink/20" />
-            <div className="absolute bottom-4 left-4 right-4 flex items-center gap-2">
+            {/* Controls stay at the top so Magda's burned-in captions stay readable */}
+            <div className="absolute left-4 right-4 top-4 flex items-center gap-2">
               <button
                 type="button"
                 onClick={togglePlay}

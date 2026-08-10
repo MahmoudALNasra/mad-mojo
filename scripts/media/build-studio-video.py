@@ -1,8 +1,9 @@
 """
 Build web-ready Mad Mojo studio video:
-  - female VO (edge-tts) + soft bed music + ducked original audio
-  - WebVTT captions synced to measured VO timing
+  - female VO synced to Magda's burned-in on-screen captions
+  - soft bed music + ducked original audio
   - short muted loops for homepage backgrounds
+  - NO separate WebVTT (captions are already in the picture)
 """
 from __future__ import annotations
 
@@ -20,52 +21,42 @@ OUT = ROOT / "public" / "videos"
 WORK = ROOT / "scripts" / "media" / "_work"
 
 VOICE = "en-US-AvaNeural"
-# Slightly faster so lines finish inside their visual windows
-RATE = "+18%"
-# Start speech a touch before the caption so VO never feels late
-VO_LEAD = 0.12
-GAP = 0.08
+RATE = "+12%"
+VO_LEAD = 0.05
+GAP = 0.06
 
-# Visual anchors + copy (end is only a soft target; real end = measured speech)
+# Spoken lines timed to the burned-in captions visible in the source video.
+# start_sec = when that caption first appears on screen (~1fps frame index).
 LINES: list[tuple[float, str]] = [
     (0.4, "Finish a painting with me!"),
-    (3.2, "We're painting with oil — let's put some final touches together."),
-    (7.8, "For red, I chose Rembrandt Permanent Red Deep, artist-quality oil paint."),
-    (13.6, "Next goes Van Gogh Cadmium Yellow — a gorgeous non-transparent colour. I just love it."),
-    (21.0, "As an addition, I'm using Winsor and Newton Fluorescent Yellow."),
-    (26.8, "Look how bright it is — sick."),
-    (30.8, "Next we have Rembrandt Turquoise — just a tiny bit as an addition."),
-    (38.0, "Rembrandt Periwinkle. It's transparent, and I'm absolutely obsessed with it."),
-    (46.0, "Looks almost like Pantone Veri Peri. Viridian hue as an addition to create the shadings."),
-    (54.5, "I like to organise my work — paints in separate boxes so I know where to search for what I need."),
-    (65.0, "I use scent-free turpentine as a medium."),
-    (71.5, "And that's how the final touches come together."),
-    (80.5, "Mad Mojo — art with a little madness in it."),
+    (2.4, "We're painting with oil paint, let's put some final touches together."),
+    (6.4, "For red, I chose Rembrandt."),
+    (8.0, "Permanent Red Deep Artist Quality Oil Paint. Next goes fine quality."),
+    (11.5, "Van Gogh Cadmium yellow."),
+    (15.0, "It's a gorgeous non transparent colour, just love it."),
+    (17.5, "As addition I am using Winsor and Newton Fluorescent Yellow."),
+    (21.0, "Look how bright it is, siiick."),
+    (24.0, "Next we have Rembrandt Oil for Art Turquoise, just a tiny bit as addition."),
+    (30.5, "Rembrandt Periwinkle, it is a transparent colour but I am absolutely obsessed with it."),
+    (34.0, "Looks almost like Pantone Veri Peri. Viridian hue as addition to create shadings."),
+    (39.0, "I recently like to organize my work so,"),
+    (41.5, "I store paints in separate boxes to know where to search for what I need."),
+    (44.5, "I use no scent turpentine as a medium."),
+    (47.5, "It's a simple solution how not to affect the paint much and keep the brushes clean."),
+    (49.5, "The painting is almost done so,"),
+    (53.5, "I am just adding small details to brighten the whole thing up."),
+    (59.0, "I am also adding more paint in the"),
+    (67.0, "the contrast and create the depth."),
+    (73.5, "I'm not forgetting about the details, as they say the devil is in the detail."),
+    (79.0, "And here we go, the final effect."),
+    (84.0, "I love how dynamic it came out, it looks so good on the wall."),
+    (89.0, "I can't wait to put the varnish on it."),
 ]
 
 
 def run(cmd: list[str]) -> None:
     print("+", " ".join(cmd[:8]), "..." if len(cmd) > 8 else "")
     subprocess.run(cmd, check=True)
-
-
-def vtt_ts(sec: float) -> str:
-    sec = max(0.0, sec)
-    h = int(sec // 3600)
-    m = int((sec % 3600) // 60)
-    s = sec % 60
-    return f"{h:02d}:{m:02d}:{s:06.3f}"
-
-
-def write_vtt(path: Path, cues: list[tuple[float, float, str]]) -> None:
-    lines = ["WEBVTT", ""]
-    for i, (start, end, text) in enumerate(cues, 1):
-        lines.append(str(i))
-        lines.append(f"{vtt_ts(start)} --> {vtt_ts(end)}")
-        lines.append(text)
-        lines.append("")
-    path.write_text("\n".join(lines), encoding="utf-8")
-    print(f"Wrote {path}")
 
 
 def wav_duration(path: Path) -> float:
@@ -77,7 +68,6 @@ async def synth_line(text: str, out: Path) -> None:
     communicate = edge_tts.Communicate(text, VOICE, rate=RATE)
     mp3 = out.with_suffix(".mp3")
     await communicate.save(str(mp3))
-    # Convert only — do not strip "silence" (edge-tts pauses get eaten otherwise)
     run(
         [
             "ffmpeg",
@@ -95,13 +85,12 @@ async def synth_line(text: str, out: Path) -> None:
 
 
 def fit_duration(src: Path, target: float, dst: Path) -> None:
-    """Speed up a clip if it overruns the available window."""
     dur = wav_duration(src)
-    if dur <= target or target <= 0.35:
+    if dur <= target or target <= 0.4:
         if src != dst:
             dst.write_bytes(src.read_bytes())
         return
-    tempo = min(1.35, dur / max(0.35, target))
+    tempo = min(1.4, dur / max(0.4, target))
     run(
         [
             "ffmpeg",
@@ -119,9 +108,7 @@ def fit_duration(src: Path, target: float, dst: Path) -> None:
     )
 
 
-async def build_vo_and_cues(
-    duration: float, out_wav: Path
-) -> list[tuple[float, float, str]]:
+async def build_vo_track(duration: float, out_wav: Path) -> None:
     parts_dir = WORK / "vo_parts"
     parts_dir.mkdir(parents=True, exist_ok=True)
 
@@ -131,29 +118,25 @@ async def build_vo_and_cues(
         await synth_line(text, part)
         raw_parts.append(part)
 
-    # Schedule: prefer visual anchor, never overlap previous speech
-    schedule: list[tuple[float, float, str, Path]] = []
+    schedule: list[tuple[float, Path]] = []
     cursor = 0.0
     for i, ((anchor, text), raw) in enumerate(zip(LINES, raw_parts)):
-        next_anchor = LINES[i + 1][0] if i + 1 < len(LINES) else duration - 0.4
-        # Leave a little air before the next line
-        window = max(0.4, next_anchor - max(anchor, cursor) - GAP)
+        next_anchor = LINES[i + 1][0] if i + 1 < len(LINES) else duration - 0.3
+        window = max(0.45, next_anchor - max(anchor, cursor) - GAP)
         fitted = parts_dir / f"{i:02d}_fit.wav"
         fit_duration(raw, window, fitted)
         dur = wav_duration(fitted)
         start = max(anchor - VO_LEAD, cursor)
-        # If still overruns next visual beat, pull start earlier into free gap
         if start + dur > next_anchor - GAP:
             start = max(cursor, next_anchor - GAP - dur)
         start = max(0.0, start)
-        end = min(duration - 0.05, start + dur)
-        schedule.append((start, end, text, fitted))
-        cursor = end + GAP
-        print(f"  cue {i:02d}: {start:6.2f}-{end:6.2f}s  ({dur:4.2f}s)  {text[:48]}")
+        schedule.append((start, fitted))
+        cursor = start + dur + GAP
+        print(f"  vo {i:02d}: {start:6.2f}s (+{dur:4.2f}s)  {text[:56]}")
 
     filter_parts: list[str] = []
     inputs: list[str] = []
-    for i, (start, _end, _text, part) in enumerate(schedule):
+    for i, (start, part) in enumerate(schedule):
         delay_ms = int(round(start * 1000))
         inputs += ["-i", str(part)]
         filter_parts.append(
@@ -164,7 +147,7 @@ async def build_vo_and_cues(
     filter_complex = (
         ";".join(filter_parts)
         + f";{mix_in}amix=inputs={len(schedule)}:normalize=0:dropout_transition=0,"
-        + "volume=1.2[vo]"
+        + "volume=1.25[vo]"
     )
     run(
         [
@@ -184,13 +167,6 @@ async def build_vo_and_cues(
             str(out_wav),
         ]
     )
-
-    # Captions match spoken audio exactly (slight pad so last word stays readable)
-    cues = [
-        (start, min(duration, end + 0.15), text)
-        for start, end, text, _ in schedule
-    ]
-    return cues
 
 
 def build_music(duration: float, out_wav: Path) -> None:
@@ -244,7 +220,6 @@ def mux_final(duration: float, vo: Path, music: Path, out_mp4: Path) -> None:
             "-i",
             str(music),
             "-filter_complex",
-            # No loudnorm (it can shift perceived timing); keep levels simple
             "[0:a]volume=0.16,highpass=f=120[orig];"
             "[1:a]volume=1.35[vo];"
             "[2:a]volume=0.45[mus];"
@@ -348,10 +323,15 @@ async def main() -> None:
 
     vo = WORK / "vo.wav"
     music = WORK / "music.wav"
-    cues = await build_vo_and_cues(duration, vo)
-    write_vtt(OUT / "studio-painting.vtt", cues)
+    await build_vo_track(duration, vo)
     build_music(duration, music)
     mux_final(duration, vo, music, OUT / "studio-painting.mp4")
+
+    # Remove old WebVTT overlays — captions are burned into the video
+    vtt = OUT / "studio-painting.vtt"
+    if vtt.exists():
+        vtt.unlink()
+        print(f"Removed {vtt}")
 
     make_loop(10, 12, OUT / "studio-loop-a.mp4")
     make_loop(40, 14, OUT / "studio-loop-b.mp4")
