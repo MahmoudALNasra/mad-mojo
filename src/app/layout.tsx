@@ -17,6 +17,9 @@ const body = Inter({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(
+    process.env.NEXT_PUBLIC_SITE_URL ?? "https://madmojo.shop"
+  ),
   title: {
     default: "Mad Mojo — Original Paintings & Wearable Art",
     template: "%s | Mad Mojo",
@@ -31,6 +34,21 @@ export const metadata: Metadata = {
     "tropical art",
     "Mad Mojo",
   ],
+  openGraph: {
+    type: "website",
+    locale: "en_US",
+    url: "/",
+    siteName: "Mad Mojo",
+    title: "Mad Mojo — Original Paintings & Wearable Art",
+    description:
+      "Bold original paintings, art prints and wearable art, hand-painted in Poland by Magda.",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Mad Mojo — Original Paintings & Wearable Art",
+    description:
+      "Bold original paintings, art prints and wearable art, hand-painted in Poland by Magda.",
+  },
 };
 
 export default async function RootLayout({

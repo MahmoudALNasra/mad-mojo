@@ -15,9 +15,20 @@ export async function generateMetadata({
     title: product.nameEn,
     description: product.descriptionEn,
     openGraph: {
+      type: "website",
       title: `${product.nameEn} | Mad Mojo`,
       description: product.descriptionEn,
-      images: product.images[0] ? [product.images[0]] : [],
+      url: `/product/${product.slug}`,
+      siteName: "Mad Mojo",
+      images: product.images[0]
+        ? [{ url: product.images[0], alt: product.nameEn }]
+        : undefined,
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: `${product.nameEn} | Mad Mojo`,
+      description: product.descriptionEn,
+      images: product.images[0] ? [product.images[0]] : undefined,
     },
   };
 }
