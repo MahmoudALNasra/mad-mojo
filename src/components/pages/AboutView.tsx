@@ -1,6 +1,5 @@
 "use client";
 
-import { ProductImage } from "@/components/ProductImage";
 import { SunLogo } from "@/components/SunLogo";
 import { useLocale } from "@/lib/i18n/LocaleProvider";
 
@@ -67,13 +66,17 @@ export function AboutView() {
       </div>
 
       <section className="mt-14 grid items-center gap-8 rounded-3xl bg-sand p-6 sm:p-10 lg:grid-cols-2">
-        <div className="relative aspect-[4/5] overflow-hidden rounded-2xl">
-          <ProductImage
-            src="/products/_site/2.jpg"
-            alt="An original Mad Mojo painting held by Magda"
-            fill
-            sizes="(max-width: 1024px) 100vw, 40vw"
-            className="object-cover object-top"
+        <div className="relative aspect-[4/5] overflow-hidden rounded-2xl bg-ink">
+          <video
+            className="absolute inset-0 h-full w-full object-cover"
+            src="/videos/studio-loop-b.mp4"
+            poster="/products/_site/2.jpg"
+            autoPlay
+            muted
+            loop
+            playsInline
+            preload="metadata"
+            aria-label="Magda painting in the studio"
           />
         </div>
         <div>

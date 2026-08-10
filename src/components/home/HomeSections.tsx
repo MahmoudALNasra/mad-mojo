@@ -66,11 +66,13 @@ export function CategoryTiles() {
       href: "/shop/paintings",
       label: t("home.cat.paintings"),
       image: "/products/parrots-in-love/1.jpg",
+      video: "/videos/studio-loop-b.mp4",
     },
     {
       href: "/shop/clothing",
       label: t("home.cat.clothing"),
       image: "/products/kimono-crane/1.jpg",
+      video: undefined as string | undefined,
     },
   ];
   return (
@@ -85,13 +87,27 @@ export function CategoryTiles() {
             href={tile.href}
             className="group relative aspect-[16/10] overflow-hidden rounded-2xl bg-sand"
           >
-            <ProductImage
-              src={tile.image}
-              alt={tile.label}
-              fill
-              sizes="(max-width: 640px) 100vw, 50vw"
-              className="object-cover object-top transition-transform duration-500 group-hover:scale-[1.03]"
-            />
+            {tile.video ? (
+              <video
+                className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
+                src={tile.video}
+                poster={tile.image}
+                autoPlay
+                muted
+                loop
+                playsInline
+                preload="metadata"
+                aria-hidden
+              />
+            ) : (
+              <ProductImage
+                src={tile.image}
+                alt={tile.label}
+                fill
+                sizes="(max-width: 640px) 100vw, 50vw"
+                className="object-cover object-top transition-transform duration-500 group-hover:scale-[1.03]"
+              />
+            )}
             <div className="absolute inset-0 bg-gradient-to-t from-ink/60 via-transparent to-transparent" />
             <div className="absolute bottom-5 left-5 flex items-center gap-3">
               <span className="font-display text-2xl font-bold text-white">

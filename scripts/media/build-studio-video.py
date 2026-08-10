@@ -20,10 +20,13 @@ SRC = Path(r"c:\Users\laalg\Downloads\madmojo painint 1.mp4")
 OUT = ROOT / "public" / "videos"
 WORK = ROOT / "scripts" / "media" / "_work"
 
-VOICE = "en-US-AvaNeural"
-RATE = "+12%"
+# Warmer conversational voice (less “news robot” than Ava)
+VOICE = "en-US-JennyNeural"
+RATE = "-6%"
+PITCH = "+2Hz"
 VO_LEAD = 0.05
-GAP = 0.06
+GAP = 0.08
+BED_SRC = WORK / "bed_src.mp3"
 
 # Spoken lines timed to the burned-in captions visible in the source video.
 # start_sec = when that caption first appears on screen (~1fps frame index).
@@ -65,9 +68,22 @@ def wav_duration(path: Path) -> float:
 
 
 async def synth_line(text: str, out: Path) -> None:
-    communicate = edge_tts.Communicate(text, VOICE, rate=RATE)
     mp3 = out.with_suffix(".mp3")
-    await communicate.save(str(mp3))
+    last_err: Exception | None = None
+    for attempt in range(5):
+        try:
+            communicate = edge_tts.Communicate(
+                text, VOICE, rate=RATE, pitch=PITCH
+            )
+            await communicate.save(str(mp3))
+            last_err = None
+            break
+        except Exception as err:  # noqa: BLE001 — retry transient edge-tts 503s
+            last_err = err
+            await asyncio.sleep(1.2 * (attempt + 1))
+    if last_err is not None:
+        raise last_err
+    # Light high-shelf cut + gentle compression = less harsh/robotic
     run(
         [
             "ffmpeg",
@@ -78,6 +94,8 @@ async def synth_line(text: str, out: Path) -> None:
             "1",
             "-ar",
             "44100",
+            "-af",
+            "highpass=f=90,lowpass=f=9800,acompressor=threshold=-18dB:ratio=2.2:attack=12:release=180:makeup=2",
             str(out),
         ]
     )
@@ -170,6 +188,42 @@ async def build_vo_track(duration: float, out_wav: Path) -> None:
 
 
 def build_music(duration: float, out_wav: Path) -> None:
+    """Soft chill bed from a royalty-free track + light room texture."""
+    fade = max(0, duration - 3)
+    if BED_SRC.exists():
+        run(
+            [
+                "ffmpeg",
+                "-y",
+                "-stream_loop",
+                "-1",
+                "-i",
+                str(BED_SRC),
+                "-f",
+                "lavfi",
+                "-i",
+                f"anoisesrc=color=pink:amplitude=0.02:sample_rate=44100:duration={duration}",
+                "-filter_complex",
+                # Warm, low music bed + subtle vinyl/room hiss
+                f"[0:a]atrim=0:{duration},asetpts=PTS-STARTPTS,"
+                "highpass=f=80,lowpass=f=4200,volume=0.28,"
+                f"afade=t=in:st=0:d=2.5,afade=t=out:st={fade}:d=3[bed];"
+                "[1:a]lowpass=f=900,volume=0.045[tex];"
+                "[bed][tex]amix=inputs=2:normalize=0[out]",
+                "-map",
+                "[out]",
+                "-t",
+                f"{duration:.3f}",
+                "-ac",
+                "2",
+                "-ar",
+                "44100",
+                str(out_wav),
+            ]
+        )
+        return
+
+    # Fallback pad if bed file missing
     run(
         [
             "ffmpeg",
@@ -177,28 +231,24 @@ def build_music(duration: float, out_wav: Path) -> None:
             "-f",
             "lavfi",
             "-i",
-            f"sine=frequency=174:sample_rate=44100:duration={duration}",
+            f"sine=frequency=196:sample_rate=44100:duration={duration}",
             "-f",
             "lavfi",
             "-i",
-            f"sine=frequency=220:sample_rate=44100:duration={duration}",
+            f"sine=frequency=246.94:sample_rate=44100:duration={duration}",
             "-f",
             "lavfi",
             "-i",
-            f"sine=frequency=261.63:sample_rate=44100:duration={duration}",
+            f"sine=frequency=293.66:sample_rate=44100:duration={duration}",
             "-f",
             "lavfi",
             "-i",
-            f"anoisesrc=color=pink:amplitude=0.03:sample_rate=44100:duration={duration}",
+            f"anoisesrc=color=pink:amplitude=0.025:sample_rate=44100:duration={duration}",
             "-filter_complex",
-            "[0:a]volume=0.04[a0];"
-            "[1:a]volume=0.03[a1];"
-            "[2:a]volume=0.025[a2];"
-            "[3:a]lowpass=f=500,volume=0.08[a3];"
+            "[0:a]volume=0.05[a0];[1:a]volume=0.04[a1];[2:a]volume=0.03[a2];"
+            "[3:a]lowpass=f=600,volume=0.07[a3];"
             "[a0][a1][a2][a3]amix=inputs=4:normalize=0,"
-            "afade=t=in:st=0:d=2,afade=t=out:st={fade}:d=3".format(
-                fade=max(0, duration - 3)
-            ),
+            f"afade=t=in:st=0:d=2,afade=t=out:st={fade}:d=3",
             "-ac",
             "2",
             "-ar",
@@ -209,6 +259,7 @@ def build_music(duration: float, out_wav: Path) -> None:
 
 
 def mux_final(duration: float, vo: Path, music: Path, out_mp4: Path) -> None:
+    # Duck music under VO so the track breathes between lines
     run(
         [
             "ffmpeg",
@@ -220,11 +271,12 @@ def mux_final(duration: float, vo: Path, music: Path, out_mp4: Path) -> None:
             "-i",
             str(music),
             "-filter_complex",
-            "[0:a]volume=0.16,highpass=f=120[orig];"
-            "[1:a]volume=1.35[vo];"
-            "[2:a]volume=0.45[mus];"
-            "[orig][vo][mus]amix=inputs=3:duration=first:dropout_transition=1,"
-            "alimiter=limit=0.95[a]",
+            "[0:a]volume=0.12,highpass=f=140,lowpass=f=6000[orig];"
+            "[1:a]volume=1.45,acompressor=threshold=-20dB:ratio=2.5:attack=8:release=120[vo];"
+            "[2:a]volume=0.85[musraw];"
+            "[musraw][vo]sidechaincompress=threshold=0.03:ratio=7:attack=40:release=520:makeup=1.4[mus];"
+            "[orig][vo][mus]amix=inputs=3:duration=first:dropout_transition=2,"
+            "alimiter=limit=0.92[a]",
             "-map",
             "0:v",
             "-map",
@@ -240,7 +292,7 @@ def mux_final(duration: float, vo: Path, music: Path, out_mp4: Path) -> None:
             "-c:a",
             "aac",
             "-b:a",
-            "96k",
+            "128k",
             "-movflags",
             "+faststart",
             "-t",
