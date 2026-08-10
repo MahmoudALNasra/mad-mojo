@@ -45,6 +45,18 @@ const en = {
   "home.story.cta": "Read our story",
   "home.reviews.title": "Loved across the map",
 
+  // Studio film
+  "studio.kicker": "Studio diary",
+  "studio.title": "Finish a painting with me",
+  "studio.body":
+    "Magda walks through the final oil touches — Rembrandt reds, Van Gogh yellow, a hit of fluorescent light — so you can see how a Mad Mojo piece actually comes alive.",
+  "studio.cta": "Shop paintings & prints",
+  "studio.play": "Play",
+  "studio.pause": "Pause",
+  "studio.mute": "Mute",
+  "studio.unmute": "Sound on",
+  "studio.badge": "90 sec",
+
   // Shipping band / zip checker
   "ship.title": "Do we deliver to you? Yes.",
   "ship.sub":
@@ -240,6 +252,17 @@ const es: Record<DictKey, string> = {
     "Magda pinta selvas, tigres y santos en colores que se niegan a comportarse. Mahmoud se encarga de que lleguen a tu puerta. Juntos somos Mad Mojo — un pequeño estudio que envía arte ruidoso desde Polonia al mundo.",
   "home.story.cta": "Lee nuestra historia",
   "home.reviews.title": "Querido en todo el mapa",
+
+  "studio.kicker": "Diario del estudio",
+  "studio.title": "Termina un cuadro conmigo",
+  "studio.body":
+    "Magda te lleva por los toques finales en óleo — rojos Rembrandt, amarillo Van Gogh, un golpe de fluorescente — para que veas cómo cobra vida una pieza Mad Mojo.",
+  "studio.cta": "Ver pinturas y láminas",
+  "studio.play": "Reproducir",
+  "studio.pause": "Pausa",
+  "studio.mute": "Silencio",
+  "studio.unmute": "Con sonido",
+  "studio.badge": "90 seg",
 
   "ship.title": "¿Entregamos en tu zona? Sí.",
   "ship.sub":

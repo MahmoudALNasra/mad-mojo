@@ -3,10 +3,10 @@ import {
   CategoryTiles,
   DeliveryBand,
   Hero,
-  ProductRow,
   Reviews,
   StoryTeaser,
 } from "@/components/home/HomeSections";
+import { StudioFilm } from "@/components/home/StudioFilm";
 import { HomeRows } from "@/components/home/HomeRows";
 import { getProducts } from "@/lib/data";
 
@@ -28,6 +28,7 @@ export default async function HomePage() {
       <UspMarquee dark />
       <HomeRows newDrop={newDrop} bestSellers={bestSellers} />
       <CategoryTiles />
+      <StudioFilm />
       <DeliveryBand />
       <StoryTeaser />
       <Reviews />

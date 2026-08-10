@@ -8,7 +8,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "prepare-images": "node scripts/prepare-images.mjs"
+    "prepare-images": "node scripts/prepare-images.mjs",
+    "prepare-studio-video": "python scripts/media/build-studio-video.py"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.4",

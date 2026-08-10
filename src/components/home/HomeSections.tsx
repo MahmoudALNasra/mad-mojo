@@ -195,14 +195,19 @@ export function StoryTeaser() {
   return (
     <section className="mx-auto max-w-7xl px-4 py-14 sm:px-6">
       <div className="grid items-center gap-8 rounded-3xl bg-sand px-6 py-10 sm:px-10 lg:grid-cols-2">
-        <div className="relative mx-auto aspect-[3/4] w-full max-w-sm overflow-hidden rounded-2xl">
-          <ProductImage
-            src="/products/_site/4.jpg"
-            alt="Magda in the Mad Mojo studio"
-            fill
-            sizes="(max-width: 1024px) 100vw, 40vw"
-            className="object-cover"
+        <div className="relative mx-auto aspect-[3/4] w-full max-w-sm overflow-hidden rounded-2xl bg-ink">
+          <video
+            className="absolute inset-0 h-full w-full object-cover"
+            src="/videos/studio-loop-a.mp4"
+            poster="/videos/studio-poster.jpg"
+            autoPlay
+            muted
+            loop
+            playsInline
+            preload="metadata"
+            aria-label="Magda painting in the Mad Mojo studio"
           />
+          <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-ink/25 via-transparent to-transparent" />
         </div>
         <div>
           <h2 className="font-display text-3xl font-bold sm:text-4xl">

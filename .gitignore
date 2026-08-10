@@ -29,3 +29,5 @@ next-env.d.ts
 
 # editor
 .cursor/
+scripts/media/_work/
+
