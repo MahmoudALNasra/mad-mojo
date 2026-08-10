@@ -259,7 +259,7 @@ def build_music(duration: float, out_wav: Path) -> None:
 
 
 def mux_final(duration: float, vo: Path, music: Path, out_mp4: Path) -> None:
-    # Duck music under VO so the track breathes between lines
+    # Keep VO dominant; music stays soft. Avoid sidechain (was crushing speech).
     run(
         [
             "ffmpeg",
@@ -271,12 +271,11 @@ def mux_final(duration: float, vo: Path, music: Path, out_mp4: Path) -> None:
             "-i",
             str(music),
             "-filter_complex",
-            "[0:a]volume=0.12,highpass=f=140,lowpass=f=6000[orig];"
-            "[1:a]volume=1.45,acompressor=threshold=-20dB:ratio=2.5:attack=8:release=120[vo];"
-            "[2:a]volume=0.85[musraw];"
-            "[musraw][vo]sidechaincompress=threshold=0.03:ratio=7:attack=40:release=520:makeup=1.4[mus];"
-            "[orig][vo][mus]amix=inputs=3:duration=first:dropout_transition=2,"
-            "alimiter=limit=0.92[a]",
+            "[0:a]volume=0.10,highpass=f=140[orig];"
+            "[1:a]aformat=channel_layouts=stereo,volume=2.4[vo];"
+            "[2:a]aformat=channel_layouts=stereo,volume=0.22,lowpass=f=4500[mus];"
+            "[orig][vo][mus]amix=inputs=3:duration=first:dropout_transition=0:normalize=0,"
+            "loudnorm=I=-14:TP=-1.5:LRA=11[a]",
             "-map",
             "0:v",
             "-map",
@@ -292,7 +291,7 @@ def mux_final(duration: float, vo: Path, music: Path, out_mp4: Path) -> None:
             "-c:a",
             "aac",
             "-b:a",
-            "128k",
+            "160k",
             "-movflags",
             "+faststart",
             "-t",

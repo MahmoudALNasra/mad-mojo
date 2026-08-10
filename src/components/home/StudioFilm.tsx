@@ -30,6 +30,9 @@ export function StudioFilm({
     const el = videoRef.current;
     if (!el) return;
     if (el.paused) {
+      // First play also turns sound on — otherwise VO is easy to miss
+      el.muted = false;
+      setMuted(false);
       void el.play();
       setPlaying(true);
     } else {
@@ -44,7 +47,7 @@ export function StudioFilm({
     const next = !muted;
     el.muted = next;
     setMuted(next);
-    if (!next && el.paused) {
+    if (!next) {
       void el.play();
       setPlaying(true);
     }

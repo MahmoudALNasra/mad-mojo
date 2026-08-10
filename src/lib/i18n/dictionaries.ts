@@ -54,7 +54,7 @@ const en = {
   "studio.play": "Play",
   "studio.pause": "Pause",
   "studio.mute": "Mute",
-  "studio.unmute": "Sound on",
+  "studio.unmute": "Turn sound on",
   "studio.badge": "90 sec",
 
   // Shipping band / zip checker
@@ -261,7 +261,7 @@ const es: Record<DictKey, string> = {
   "studio.play": "Reproducir",
   "studio.pause": "Pausa",
   "studio.mute": "Silencio",
-  "studio.unmute": "Con sonido",
+  "studio.unmute": "Activar sonido",
   "studio.badge": "90 seg",
 
   "ship.title": "¿Entregamos en tu zona? Sí.",
