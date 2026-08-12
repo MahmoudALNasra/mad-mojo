@@ -68,19 +68,13 @@ export function CategoryTiles() {
       image: "/products/parrots-in-love/1.jpg",
       video: "/videos/studio-loop-b.mp4",
     },
-    {
-      href: "/shop/clothing",
-      label: t("home.cat.clothing"),
-      image: "/products/kimono-crane/1.jpg",
-      video: undefined as string | undefined,
-    },
   ];
   return (
     <section className="mx-auto max-w-7xl px-4 py-12 sm:px-6">
       <h2 className="mb-6 font-display text-2xl font-bold sm:text-3xl">
         {t("home.categories")}
       </h2>
-      <div className="grid gap-4 sm:grid-cols-2">
+      <div className={`grid gap-4 ${tiles.length > 1 ? "sm:grid-cols-2" : ""}`}>
         {tiles.map((tile) => (
           <Link
             key={tile.href}

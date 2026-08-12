@@ -22,7 +22,7 @@ export default async function EditProductPage({
   if (!data) notFound();
 
   const product = mapProductRow(data);
-  const categories = await getCategories();
+  const categories = await getCategories({ includeHidden: true });
   const categoryIdBySlug = Object.fromEntries(
     categories.map((c) => [c.slug, c.id])
   );

@@ -39,7 +39,6 @@ export function Footer() {
             <ul className="space-y-2.5 text-sm">
               <li><Link href="/shop" className="hover:text-sun">{t("nav.shop")}</Link></li>
               <li><Link href="/shop/paintings" className="hover:text-sun">{t("nav.paintings")}</Link></li>
-              <li><Link href="/shop/clothing" className="hover:text-sun">{t("nav.clothing")}</Link></li>
             </ul>
           </div>
 

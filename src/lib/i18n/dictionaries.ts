@@ -60,10 +60,12 @@ const en = {
   // Shipping band / zip checker
   "ship.title": "Do we deliver to you? Yes.",
   "ship.sub":
-    "Enter your ZIP or postal code and see exactly when a piece could be hanging on your wall.",
+    "We estimate delivery for your area automatically — or enter a ZIP to refine it.",
   "ship.placeholder": "ZIP / postal code",
   "ship.check": "Check delivery",
   "ship.checking": "Checking…",
+  "ship.detecting": "Finding your area…",
+  "ship.autoDetected": "Based on your area",
   "ship.deliversTo": "We deliver to",
   "ship.eta": "Estimated delivery",
   "ship.etaShort": "Get it by",
@@ -266,10 +268,12 @@ const es: Record<DictKey, string> = {
 
   "ship.title": "¿Entregamos en tu zona? Sí.",
   "ship.sub":
-    "Escribe tu código postal y descubre exactamente cuándo podría estar una pieza colgada en tu pared.",
+    "Estimamos la entrega en tu zona automáticamente — o escribe un código postal para afinarla.",
   "ship.placeholder": "Código postal",
   "ship.check": "Comprobar entrega",
   "ship.checking": "Comprobando…",
+  "ship.detecting": "Buscando tu zona…",
+  "ship.autoDetected": "Según tu zona",
   "ship.deliversTo": "Entregamos en",
   "ship.eta": "Entrega estimada",
   "ship.etaShort": "Recíbelo antes del",

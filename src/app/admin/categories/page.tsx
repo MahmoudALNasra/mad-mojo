@@ -4,7 +4,7 @@ import { deleteCategory, saveCategory } from "../actions";
 
 export default async function AdminCategoriesPage() {
   const [categories, products] = await Promise.all([
-    getCategories(),
+    getCategories({ includeHidden: true }),
     getProducts({ includeInactive: true }),
   ]);
   const editable = supabaseServerConfigured();

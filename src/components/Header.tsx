@@ -10,7 +10,6 @@ import { SunLogo } from "./SunLogo";
 const NAV = [
   { href: "/shop", key: "nav.shop" as const },
   { href: "/shop/paintings", key: "nav.paintings" as const },
-  { href: "/shop/clothing", key: "nav.clothing" as const },
   { href: "/about", key: "nav.about" as const },
   { href: "/contact", key: "nav.contact" as const },
 ];

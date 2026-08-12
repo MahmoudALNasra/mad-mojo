@@ -31,3 +31,8 @@ next-env.d.ts
 .cursor/
 scripts/media/_work/
 
+# reel build scratch (keep scripts + final outs)
+reels/frames/
+reels/out/_tmp/
+reels/out/previews/
+

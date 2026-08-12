@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useLocale } from "@/lib/i18n/LocaleProvider";
 import {
   businessDaysFromNow,
@@ -8,31 +8,76 @@ import {
   type DeliveryEstimate,
 } from "@/lib/shipping";
 
+type DetectPayload = {
+  detected: boolean;
+  location?: { postal?: string; city?: string; country?: string };
+  estimate: DeliveryEstimate | null;
+};
+
 export function ZipChecker({ compact = false }: { compact?: boolean }) {
   const { t, locale } = useLocale();
   const [code, setCode] = useState("");
   const [loading, setLoading] = useState(false);
+  const [detecting, setDetecting] = useState(true);
   const [result, setResult] = useState<DeliveryEstimate | null>(null);
   const [invalid, setInvalid] = useState(false);
+  const [autoDetected, setAutoDetected] = useState(false);
+  const didDetect = useRef(false);
+
+  async function fetchEstimate(postal: string) {
+    const res = await fetch(
+      `/api/shipping/estimate?postal=${encodeURIComponent(postal)}`
+    );
+    const data = await res.json();
+    if (!res.ok || !data.estimate) {
+      setInvalid(true);
+      setResult(null);
+      return false;
+    }
+    setInvalid(false);
+    setResult(data.estimate);
+    return true;
+  }
+
+  // Silent IP-based detection — never asks for browser location permission.
+  useEffect(() => {
+    if (didDetect.current) return;
+    didDetect.current = true;
+
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await fetch("/api/shipping/detect");
+        const data = (await res.json()) as DetectPayload;
+        if (cancelled) return;
+        if (data.detected && data.location?.postal && data.estimate) {
+          setCode(data.location.postal);
+          setResult(data.estimate);
+          setAutoDetected(true);
+        }
+      } catch {
+        // Manual entry still works.
+      } finally {
+        if (!cancelled) setDetecting(false);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   async function check(e: React.FormEvent) {
     e.preventDefault();
     if (!code.trim()) return;
     setLoading(true);
     setInvalid(false);
-    setResult(null);
+    setAutoDetected(false);
     try {
-      const res = await fetch(
-        `/api/shipping/estimate?postal=${encodeURIComponent(code.trim())}`
-      );
-      const data = await res.json();
-      if (!res.ok || !data.estimate) {
-        setInvalid(true);
-      } else {
-        setResult(data.estimate);
-      }
+      await fetchEstimate(code.trim());
     } catch {
       setInvalid(true);
+      setResult(null);
     } finally {
       setLoading(false);
     }
@@ -59,8 +104,13 @@ export function ZipChecker({ compact = false }: { compact?: boolean }) {
           </svg>
           <input
             value={code}
-            onChange={(e) => setCode(e.target.value)}
-            placeholder={t("ship.placeholder")}
+            onChange={(e) => {
+              setCode(e.target.value);
+              setAutoDetected(false);
+            }}
+            placeholder={
+              detecting ? t("ship.detecting") : t("ship.placeholder")
+            }
             inputMode="text"
             autoComplete="postal-code"
             className={`w-full rounded-full border bg-white py-3 pl-11 pr-4 text-sm font-medium focus:outline-none ${
@@ -72,7 +122,7 @@ export function ZipChecker({ compact = false }: { compact?: boolean }) {
         </div>
         <button
           type="submit"
-          disabled={loading}
+          disabled={loading || detecting}
           className={`shrink-0 rounded-full bg-ink px-5 text-sm font-bold text-cream transition-colors hover:bg-mojo disabled:opacity-60 ${
             compact ? "py-2.5" : "py-3"
           }`}
@@ -89,6 +139,11 @@ export function ZipChecker({ compact = false }: { compact?: boolean }) {
 
       {result && etaMin && etaMax && (
         <div className="animate-rise-in mt-3 rounded-2xl border border-jungle/25 bg-jungle/5 p-4 text-left">
+          {autoDetected && (
+            <p className="mb-1.5 text-xs font-semibold uppercase tracking-wider text-jungle/70">
+              {t("ship.autoDetected")}
+            </p>
+          )}
           <p className="flex items-center gap-2 text-sm font-bold text-jungle">
             <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M5 13l4 4L19 7" />

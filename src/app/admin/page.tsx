@@ -5,7 +5,7 @@ import { createClient, supabaseServerConfigured } from "@/lib/supabase/server";
 export default async function AdminDashboard() {
   const [products, categories] = await Promise.all([
     getProducts({ includeInactive: true }),
-    getCategories(),
+    getCategories({ includeHidden: true }),
   ]);
 
   let orderCount = 0;

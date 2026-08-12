@@ -3,7 +3,7 @@ import { getCategories } from "@/lib/data";
 import { saveProduct } from "../../actions";
 
 export default async function NewProductPage() {
-  const categories = await getCategories();
+  const categories = await getCategories({ includeHidden: true });
   const categoryIdBySlug = Object.fromEntries(
     categories.map((c) => [c.slug, c.id])
   );
